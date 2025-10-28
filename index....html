@@ -2,988 +2,466 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>참여 없이는 기록도 없다.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>랜덤 플레이어</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Noto Sans KR", Arial, sans-serif;
-            background: linear-gradient(135deg, #E8F8F7 0%, #B8F5E9 50%, #A8E6CE 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #00B5B8 0%, #4DD4D6 100%);
             min-height: 100vh;
-            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
             position: relative;
-            overflow-x: hidden;
         }
-        
-        /* 배경 패턴 효과 */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 15% 25%, rgba(0, 206, 201, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 85% 75%, rgba(168, 230, 206, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(184, 245, 233, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            animation: float-pattern 20s ease-in-out infinite;
-        }
-        
-        @keyframes float-pattern {
-            0%, 100% { opacity: 0.6; transform: translateY(0); }
-            50% { opacity: 1; transform: translateY(-20px); }
-        }
-        
-        .floating-hearts {
+
+        /* 귀여운 떠다니는 요소들 */
+        .floating-elements {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            overflow: hidden;
             z-index: 1;
         }
-        
-        .heart {
+
+        .floating-icon {
             position: absolute;
-            font-size: 24px;
-            opacity: 0;
-            animation: float-up 8s ease-in infinite;
-            filter: drop-shadow(0 2px 4px rgba(0, 206, 201, 0.2));
+            font-size: 2rem;
+            opacity: 0.5;
+            animation: float 6s ease-in-out infinite;
         }
-        
-        @keyframes float-up {
-            0% {
-                transform: translateY(100vh) rotate(0deg) scale(0.8);
-                opacity: 0;
-            }
-            10% { opacity: 0.9; }
-            90% { opacity: 0.9; }
-            100% {
-                transform: translateY(-100px) rotate(360deg) scale(1.2);
-                opacity: 0;
-            }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(5deg); }
+            50% { transform: translateY(-40px) rotate(-5deg); }
+            75% { transform: translateY(-20px) rotate(5deg); }
         }
-        
+
+        .icon1 { top: 10%; left: 10%; animation-delay: 0s; }
+        .icon2 { top: 20%; left: 80%; animation-delay: 1s; font-size: 2.5rem; }
+        .icon3 { top: 60%; left: 15%; animation-delay: 2s; font-size: 1.8rem; }
+        .icon4 { top: 70%; left: 75%; animation-delay: 3s; font-size: 2.2rem; }
+        .icon5 { top: 40%; left: 90%; animation-delay: 4s; }
+        .icon6 { top: 80%; left: 40%; animation-delay: 5s; font-size: 1.5rem; }
+        .icon7 { top: 15%; left: 50%; animation-delay: 2.5s; font-size: 2rem; }
+        .icon8 { top: 85%; left: 70%; animation-delay: 1.5s; font-size: 1.7rem; }
+
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 254, 253, 0.95) 100%);
-            border-radius: 30px 30px 0 0;
-            padding: 40px 30px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 
-                0 10px 40px rgba(0, 206, 201, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-        }
-        
-        /* 헤더 장식 요소 */
-        .header::before {
-            content: '✨';
-            position: absolute;
-            font-size: 120px;
-            opacity: 0.08;
-            top: -20px;
-            left: 30px;
-            animation: twinkle 3s ease-in-out infinite;
-        }
-        
-        .header::after {
-            content: '🎵';
-            position: absolute;
-            font-size: 100px;
-            opacity: 0.08;
-            bottom: -10px;
-            right: 30px;
-            animation: bounce-soft 4s ease-in-out infinite;
-        }
-        
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.08; transform: scale(1); }
-            50% { opacity: 0.15; transform: scale(1.1); }
-        }
-        
-        @keyframes bounce-soft {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .header h1 {
-            font-size: 48px;
-            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 50%, #00CEC9 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 900;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
-            letter-spacing: -1px;
-            text-shadow: 0 2px 20px rgba(0, 206, 201, 0.2);
-        }
-        
-        .header h2 {
-            font-size: 28px;
-            color: #2d3436;
-            font-weight: 600;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
-            letter-spacing: -0.5px;
-        }
-        
-        .live-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
-            color: white;
-            padding: 10px 24px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 700;
-            animation: pulse-badge 2s ease-in-out infinite;
-            box-shadow: 
-                0 4px 15px rgba(0, 206, 201, 0.3),
-                0 2px 8px rgba(0, 206, 201, 0.2);
-            letter-spacing: 0.5px;
-        }
-        
-        @keyframes pulse-badge {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(0, 206, 201, 0.3); }
-            50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 206, 201, 0.4); }
-        }
-        
-        .mission-banner {
-            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 50%, #A8E6CE 100%);
-            padding: 25px;
-            text-align: center;
-            color: white;
-            font-size: 20px;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 20px rgba(0, 206, 201, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .mission-banner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 181, 184, 0.4);
+            padding: 40px;
+            max-width: 900px;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            animation: shine 3s ease-in-out infinite;
-        }
-        
-        @keyframes shine {
-            0% { left: -100%; }
-            50%, 100% { left: 100%; }
-        }
-        
-        .video-container {
-            background: white;
             position: relative;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            z-index: 10;
+            animation: slideIn 0.5s ease-out;
         }
-        
-        .video-wrapper {
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .player-wrapper {
             position: relative;
             padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
-            background: #000;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 40px rgba(0, 181, 184, 0.3);
+            border: 3px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #00B5B8, #4DD4D6) border-box;
         }
-        
-        .video-wrapper iframe {
+
+        .player-wrapper iframe {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             border: none;
+            border-radius: 17px;
         }
-        
-        .video-info {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 254, 253, 0.98) 100%);
-            padding: 30px;
-            color: #2d3436;
-            backdrop-filter: blur(10px);
-            border-top: 2px solid rgba(0, 206, 201, 0.1);
+
+        .info-box {
+            background: linear-gradient(135deg, #00B5B8 0%, #4DD4D6 100%);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 181, 184, 0.3);
+            position: relative;
+            overflow: hidden;
         }
-        
-        .now-playing {
-            font-size: 13px;
-            color: #00CEC9;
-            font-weight: 700;
-            margin-bottom: 12px;
+
+        .info-box::before {
+            content: '🎵';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+
+        .current-song {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .song-count {
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        /* 곡 목록 스타일 */
+        .playlist-container {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            max-height: 250px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .playlist-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .playlist-container::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .playlist-container::-webkit-scrollbar-thumb {
+            background: #00B5B8;
+            border-radius: 10px;
+        }
+
+        .playlist-container::-webkit-scrollbar-thumb:hover {
+            background: #009a9d;
+        }
+
+        .playlist-header {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #00B5B8;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             display: flex;
             align-items: center;
             gap: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
-        
-        .video-title {
-            font-size: 26px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            color: #2d3436;
-            line-height: 1.3;
+
+        .song-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-        
-        .timer-box {
-            background: linear-gradient(135deg, rgba(0, 206, 201, 0.08) 0%, rgba(168, 230, 206, 0.08) 100%);
-            padding: 15px 25px;
-            border-radius: 20px;
-            border: 2px solid rgba(0, 206, 201, 0.2);
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 16px;
-            color: #2d3436;
+
+        .song-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 181, 184, 0.2);
+        }
+
+        .song-item.playing {
+            background: linear-gradient(135deg, #00B5B8 0%, #4DD4D6 100%);
+            color: white;
             font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 181, 184, 0.4);
         }
-        
-        .timer-number {
-            color: #00CEC9;
-            font-weight: 800;
-            font-size: 24px;
-            margin-left: 8px;
+
+        .song-number {
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0.7;
+            min-width: 25px;
         }
-        
-        .next-btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
+
+        .song-item.playing .song-number {
+            opacity: 1;
+        }
+
+        .song-title {
+            font-size: 0.9rem;
+            flex: 1;
+        }
+
+        .playing-indicator {
+            font-size: 1.2rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00B5B8 0%, #4DD4D6 100%);
             color: white;
             border: none;
-            border-radius: 20px;
-            font-size: 17px;
-            font-weight: 800;
+            padding: 16px 35px;
+            border-radius: 50px;
+            font-size: 1.05rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 
-                0 6px 20px rgba(0, 206, 201, 0.3),
-                0 2px 8px rgba(0, 206, 201, 0.2);
-            letter-spacing: 0.5px;
+            box-shadow: 0 6px 20px rgba(0, 181, 184, 0.4);
+            position: relative;
+            overflow: hidden;
         }
-        
-        .next-btn:hover {
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
             transform: translateY(-3px);
-            box-shadow: 
-                0 10px 30px rgba(0, 206, 201, 0.4),
-                0 4px 12px rgba(0, 206, 201, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 181, 184, 0.6);
         }
-        
-        .next-btn:active {
+
+        button:active {
             transform: translateY(-1px);
         }
-        
-        .stats-section {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 254, 253, 0.95) 100%);
-            padding: 40px 30px;
-            border-radius: 0 0 30px 30px;
-            backdrop-filter: blur(10px);
-            box-shadow: 
-                0 -5px 20px rgba(0, 206, 201, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
-        }
-        
-        .section-title {
-            font-size: 26px;
-            font-weight: 800;
-            color: #2d3436;
-            margin-bottom: 30px;
-            text-align: center;
-            letter-spacing: -0.5px;
-        }
-        
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-        
-        .song-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 
-                0 4px 20px rgba(0, 206, 201, 0.08),
-                0 2px 8px rgba(0, 0, 0, 0.04);
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid transparent;
-        }
-        
-        .song-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 
-                0 12px 35px rgba(0, 206, 201, 0.2),
-                0 6px 15px rgba(0, 0, 0, 0.08);
-            border-color: rgba(0, 206, 201, 0.3);
-        }
-        
-        .song-card.playing {
-            border-color: #00CEC9;
-            box-shadow: 
-                0 12px 40px rgba(0, 206, 201, 0.3),
-                0 6px 20px rgba(0, 0, 0, 0.1),
-                inset 0 0 0 2px rgba(0, 206, 201, 0.1);
-            animation: glow-card 2s ease-in-out infinite;
-        }
-        
-        @keyframes glow-card {
-            0%, 100% { 
-                border-color: #00CEC9; 
-                box-shadow: 
-                    0 12px 40px rgba(0, 206, 201, 0.3),
-                    0 6px 20px rgba(0, 0, 0, 0.1);
-            }
-            50% { 
-                border-color: #00E0D4; 
-                box-shadow: 
-                    0 15px 50px rgba(0, 206, 201, 0.4),
-                    0 8px 25px rgba(0, 0, 0, 0.12);
-            }
-        }
-        
-        .thumbnail-wrapper {
-            position: relative;
-            padding-bottom: 56.25%;
-            overflow: hidden;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        }
-        
-        .thumbnail-wrapper img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .song-card:hover .thumbnail-wrapper img {
-            transform: scale(1.15);
-        }
-        
-        .play-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0, 206, 201, 0.85) 0%, rgba(0, 224, 212, 0.85) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-        
-        .song-card:hover .play-overlay {
-            opacity: 1;
-        }
-        
-        .play-icon-large {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #00CEC9;
-            font-size: 24px;
-            box-shadow: 
-                0 8px 25px rgba(0, 0, 0, 0.2),
-                0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-            padding-left: 4px;
-        }
-        
-        .song-card:hover .play-icon-large {
-            transform: scale(1.1);
-        }
-        
-        .song-card.playing .play-overlay {
-            opacity: 1;
-            background: linear-gradient(135deg, rgba(0, 206, 201, 0.3) 0%, rgba(168, 230, 206, 0.3) 100%);
-        }
-        
-        .song-card.playing .play-icon-large {
-            animation: pulse-play 1.5s ease-in-out infinite;
-            background: #00CEC9;
-            color: white;
-        }
-        
-        @keyframes pulse-play {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-        }
-        
-        .song-info {
-            padding: 14px;
-            background: white;
-        }
-        
-        .song-title-grid {
-            font-size: 13px;
-            font-weight: 700;
-            color: #2d3436;
-            line-height: 1.5;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            min-height: 39px;
-        }
-        
-        .firebase-status {
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 14px;
-            z-index: 1000;
-            box-shadow: 
-                0 6px 20px rgba(0, 206, 201, 0.3),
-                0 3px 10px rgba(0, 0, 0, 0.1);
-            animation: slide-in 0.5s ease;
-        }
-        
-        @keyframes slide-in {
-            from {
-                transform: translateX(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        /* 스크롤바 스타일링 */
-        ::-webkit-scrollbar {
-            width: 12px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 206, 201, 0.05);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #00CEC9 0%, #A8E6CE 100%);
-            border-radius: 10px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #00E0D4 0%, #B8F5E9 100%);
-        }
 
-        /* ============================================ */
-        /* 📱 모바일 최적화 (0-767px)                    */
-        /* ============================================ */
-        @media screen and (max-width: 767px) {
-            body {
-                padding: 10px;
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
             }
-
-            .header {
-                padding: 25px 20px;
-                border-radius: 20px 20px 0 0;
+            h1 {
+                font-size: 1.7rem;
             }
-
-            .header::before {
-                font-size: 70px;
-                left: 10px;
-                top: -10px;
+            button {
+                padding: 14px 28px;
+                font-size: 0.95rem;
             }
-
-            .header::after {
-                font-size: 60px;
-                right: 10px;
-                bottom: -5px;
-            }
-
-            .header h1 {
-                font-size: 28px;
-                margin-bottom: 8px;
-                letter-spacing: -0.5px;
-            }
-
-            .header h2 {
-                font-size: 18px;
-                margin-bottom: 15px;
-            }
-
-            .live-badge {
-                padding: 8px 18px;
-                font-size: 12px;
-                border-radius: 20px;
-            }
-
-            .mission-banner {
-                padding: 18px 15px;
-                font-size: 16px;
-                letter-spacing: 0.3px;
-            }
-
-            .video-info {
-                padding: 20px 15px;
-            }
-
-            .video-title {
-                font-size: 18px;
-                margin-bottom: 15px;
-            }
-
-            .timer-box {
-                padding: 12px 20px;
-                font-size: 14px;
-                margin-bottom: 15px;
-            }
-
-            .timer-number {
-                font-size: 18px;
-            }
-
-            .next-btn {
-                padding: 14px;
-                font-size: 15px;
-            }
-
-            .stats-section {
-                padding: 25px 15px;
-                border-radius: 0 0 20px 20px;
-            }
-
-            .section-title {
-                font-size: 20px;
-                margin-bottom: 20px;
-            }
-
-            .grid-container {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 14px;
-            }
-
-            .song-title-grid {
-                font-size: 12px;
-            }
-
-            /* 모바일에서 hover 효과 제거 및 터치 최적화 */
-            .song-card:hover {
-                transform: none;
-            }
-
-            .song-card:active {
-                transform: scale(0.97);
-                transition: transform 0.1s ease;
-            }
-
-            .next-btn:hover {
-                transform: none;
-            }
-
-            .next-btn:active {
-                transform: scale(0.98);
-            }
-
-            .firebase-status {
-                top: 15px;
-                right: 15px;
-                font-size: 13px;
-                padding: 10px 20px;
-            }
-
-            .heart {
-                font-size: 18px;
-            }
-        }
-
-        /* ============================================ */
-        /* 📱 태블릿 최적화 (768px-1023px)               */
-        /* ============================================ */
-        @media screen and (min-width: 768px) and (max-width: 1023px) {
-            .grid-container {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
-            }
-
-            .header {
-                padding: 35px 25px;
-            }
-
-            .header h1 {
-                font-size: 38px;
-            }
-
-            .header h2 {
-                font-size: 24px;
-            }
-
-            .mission-banner {
-                padding: 22px 20px;
-                font-size: 18px;
-            }
-
-            .stats-section {
-                padding: 35px 25px;
-            }
-
-            .section-title {
-                font-size: 24px;
-            }
-        }
-
-        /* ============================================ */
-        /* 🖥️ 데스크탑 최적화 (1024px+)                  */
-        /* ============================================ */
-        @media (max-width: 1024px) {
-            .grid-container {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
-            }
-        }
-
-        /* ============================================ */
-        /* 🎯 터치 디바이스 최적화                        */
-        /* ============================================ */
-        @media (hover: none) and (pointer: coarse) {
-            .song-card {
-                -webkit-tap-highlight-color: transparent;
-                touch-action: manipulation;
-            }
-
-            /* 터치 시 즉각적인 피드백 */
-            .song-card:active {
-                transform: scale(0.97);
-                transition: transform 0.1s ease;
-            }
-
-            /* 터치 디바이스에서 hover 효과 비활성화 */
-            .song-card:hover {
-                transform: none;
-                box-shadow: 
-                    0 4px 20px rgba(0, 206, 201, 0.08),
-                    0 2px 8px rgba(0, 0, 0, 0.04);
-            }
-
-            .next-btn:hover {
-                transform: none;
-            }
-
-            .next-btn:active {
-                transform: scale(0.98);
-            }
-        }
-
-        /* ============================================ */
-        /* 🌐 가로 모드 모바일 최적화                     */
-        /* ============================================ */
-        @media screen and (max-height: 500px) and (orientation: landscape) {
-            .header {
-                padding: 20px;
-            }
-
-            .header h1 {
-                font-size: 24px;
-            }
-
-            .header h2 {
-                font-size: 16px;
-            }
-
-            .mission-banner {
-                padding: 15px;
-                font-size: 14px;
-            }
-
-            .stats-section {
-                padding: 20px 15px;
-            }
-
-            .section-title {
-                font-size: 18px;
-                margin-bottom: 15px;
-            }
-
-            .grid-container {
-                gap: 12px;
+            .playlist-container {
+                max-height: 200px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="floating-hearts" id="floatingHearts"></div>
-    <div class="firebase-status" id="firebaseStatus">Firebase 연결 중...</div>
-
     <div class="container">
-        <div class="header">
-            <h1>🦌 유튜브 랜덤 플레이 타임</h1>
-            <h2>참여 없이는 기록도 없다</h2>
-            <div>
-                <span class="live-badge">🔴 LIVE</span>
-            </div>
+        <h1>🎵 랜덤 플레이어</h1>
+        <p class="subtitle">총공용 랜덤 재생</p>
+        
+        <div class="info-box">
+            <div class="current-song" id="currentSong">준비 중...</div>
+            <div class="song-count" id="songCount">총 0곡</div>
         </div>
 
-        <div class="mission-banner">
-            🎯 조회수 up 프로젝트 🎯
+        <div class="player-wrapper">
+            <div id="player"></div>
         </div>
 
-        <div class="video-container">
-            <div class="video-wrapper">
-                <iframe id="videoFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <!-- 곡 목록 -->
+        <div class="playlist-container">
+            <div class="playlist-header">
+                📋 재생 목록
             </div>
-            <div class="video-info">
-                <div class="now-playing">
-                    <span>▶ NOW PLAYING</span>
-                </div>
-                <div class="video-title" id="videoTitle">로딩 중...</div>
-                <div class="timer-box">
-                    다음 곡까지: <span class="timer-number" id="countdown">-</span>
-                </div>
-                <button class="next-btn" onclick="playNextRandom()">🎲 랜덤플레이 타임</button>
-            </div>
+            <div id="playlistItems"></div>
         </div>
 
-        <div class="stats-section">
-            <div class="section-title">🎼 수록곡 목록 (총 16곡)</div>
-            <div class="grid-container" id="songGrid"></div>
+        <div class="controls">
+            <button onclick="playRandomSong()">🔀 다음 곡</button>
+            <button onclick="reloadPage()">🔄 새로고침</button>
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        // ========================================
-        // 🔥 Firebase 설정
-        // ========================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyBv9j0c_n6iGC_Yc6k-1T3KM5aR-UQzq_M",
-            authDomain: "haimyon-7fdeb.firebaseapp.com",
-            databaseURL: "https://haimyon-7fdeb-default-rtdb.firebaseio.com",
-            projectId: "haimyon-7fdeb",
-            storageBucket: "haimyon-7fdeb.firebasestorage.app",
-            messagingSenderId: "799629481012",
-            appId: "1:799629481012:web:5fcadbbf29ee86ad56f1ed",
-            measurementId: "G-QBKVXQ3ES8"
-        };
-
-        const videos = [
-            { id: 'nczfiJBMA2U', title: '내게 남은 사랑을 드릴께요 Official MV'},
-            { id: 'n47GSwm7MuI', title: '장민호 유튜브 시작 EP.00'},
-            { id: 'Ghg7vG3NMs4', title: 'Hankyeryeong Pass' },
-            { id: 'ILppFoa3FTI', title: 'Lonely Love' },
-            { id: 'DKgiBUaZXr4', title: 'My Reflection in My Heart' },
-            { id: 'a7hUuTsNIRY', title: 'Stay by My Side(내 곁에 있어주)' },
-            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE' },
-            { id: '1LlNcwtxsgg', title: 'I\'ll Give You the Love I Have Left'},
-            { id: 'rsW-F7IRGmU', title: 'Just a Friend' },
-            { id: 'H8ZnFKkc7ps', title: 'That Day'},
-            { id: 'q78AVE07wdI', title: 'I will let go' },
+        // ============================================
+        // 🎵 여기서 곡 리스트를 수정하세요!
+        // ============================================
+        const songs = [
+            { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV' },
             { id: '0JeQF_nrSmU', title: '내 곁에 있어주 (Stay by My Side) Official MV' },
-            { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', initialViews:65623 },
-            { id: '-zYhlQn6yVI', title: '내 이름 아시죠 | 사랑의콜센타', initialViews: 8833996},
-            { id: 'ZOPl8hBKd5c', title: ' 하이뮨의 NEW CF 촬영 현장', initialViews: 10202 },
-            { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', initialViews: 0}
+            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE' }
         ];
 
-        let db;
-        let currentIndex = 0;
-        let isPlaying = false;
-        let countdown = 0;
-        let timerInterval;
+        let player;
+        let currentSongIndex = -1;
+        let playDuration = 0;
 
-        // ========================================
-        // ⏰ 시간대별 자동 재생 설정
-        // ========================================
-        function getTimeBasedDuration() {
-            const hour = new Date().getHours();
-            let min, max;
-
-            if (hour >= 6 && hour < 12) {
-                // 아침 (06:00-11:59): 85~95초
-                min = 85;
-                max = 95;
-            } else if (hour >= 12 && hour < 18) {
-                // 점심 (12:00-17:59): 85~95초
-                min = 85;
-                max = 95;
-            } else {
-                // 저녁 (18:00-05:59):85~100초
-                min = 85;
-                max = 100;
+        // 개발자 도구 차단
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.keyCode === 123 || // F12
+                (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+                (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
+                (e.ctrlKey && e.keyCode === 85)) { // Ctrl+U
+                e.preventDefault();
+                return false;
             }
+        });
 
-            const range = max - min + 1;
-            return Math.floor(Math.random() * range) + min;
-        }
-
-        function initializeFirebase() {
-            try {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
-                
-                videos.forEach((video, index) => {
-                    db.ref('views/' + index).once('value', (snapshot) => {
-                        if (!snapshot.exists()) {
-                            db.ref('views/' + index).set(video.initialViews || 0);
-                        }
-                    });
-                });
-
-                document.getElementById('firebaseStatus').textContent = '✅ Firebase 연결됨';
-                setTimeout(() => {
-                    document.getElementById('firebaseStatus').style.display = 'none';
-                }, 3000);
-                
-                console.log('✅ Firebase 연결 성공');
-            } catch (error) {
-                console.error('Firebase 초기화 실패:', error);
-                document.getElementById('firebaseStatus').textContent = '⚠️ Firebase 오류';
-                document.getElementById('firebaseStatus').style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%)';
-            }
-        }
-
-        function createSongGrid() {
-            const gridHTML = videos.map((video, index) => `
-                <div class="song-card ${index === currentIndex && isPlaying ? 'playing' : ''}" onclick="playVideo(${index})" id="card-${index}">
-                    <div class="thumbnail-wrapper">
-                        <img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg" alt="${video.title}" loading="lazy">
-                        <div class="play-overlay">
-                            <div class="play-icon-large">▶</div>
-                        </div>
-                    </div>
-                    <div class="song-info">
-                        <div class="song-title-grid">${video.title}</div>
-                    </div>
+        // 곡 목록 렌더링
+        function renderPlaylist() {
+            const playlistDiv = document.getElementById('playlistItems');
+            playlistDiv.innerHTML = songs.map((song, index) => `
+                <div class="song-item" id="song-${index}" onclick="playSongByIndex(${index})">
+                    <span class="song-number">${index + 1}</span>
+                    <span class="song-title">${song.title}</span>
+                    <span class="playing-indicator" style="display: none;">▶</span>
                 </div>
             `).join('');
-
-            document.getElementById('songGrid').innerHTML = gridHTML;
         }
 
-        function updatePlayingCard() {
-            document.querySelectorAll('.song-card').forEach((card, index) => {
-                if (index === currentIndex && isPlaying) {
-                    card.classList.add('playing');
+        // 현재 재생 중인 곡 표시 업데이트
+        function updatePlayingIndicator() {
+            document.querySelectorAll('.song-item').forEach((item, index) => {
+                const indicator = item.querySelector('.playing-indicator');
+                if (index === currentSongIndex) {
+                    item.classList.add('playing');
+                    indicator.style.display = 'block';
                 } else {
-                    card.classList.remove('playing');
+                    item.classList.remove('playing');
+                    indicator.style.display = 'none';
                 }
             });
         }
 
-        function playVideo(index) {
-            currentIndex = index;
-            isPlaying = true;
+        // 특정 곡 재생
+        function playSongByIndex(index) {
+            currentSongIndex = index;
+            const song = songs[currentSongIndex];
+            playDuration = Math.floor(Math.random() * 11) + 45;
             
-            const video = videos[index];
-            document.getElementById('videoFrame').src = 
-                `https://www.youtube.com/embed/${video.id}?autoplay=1&controls=1&rel=0`;
-            document.getElementById('videoTitle').textContent = video.title;
-
-            const duration = getTimeBasedDuration();
-            startTimer(duration);
-            updatePlayingCard();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('currentSong').textContent = song.title;
+            updatePlayingIndicator();
+            
+            if (player && player.loadVideoById) {
+                player.loadVideoById({
+                    videoId: song.id,
+                    startSeconds: 0,
+                    endSeconds: playDuration
+                });
+            }
         }
 
-        function playNextRandom() {
-            let nextIndex;
-            do {
-                nextIndex = Math.floor(Math.random() * videos.length);
-            } while (nextIndex === currentIndex && videos.length > 1);
-            playVideo(nextIndex);
-        }
-
-        function startTimer(duration) {
-            countdown = duration;
-            updateTimer();
-
-            if (timerInterval) clearInterval(timerInterval);
-
-            timerInterval = setInterval(() => {
-                countdown--;
-                updateTimer();
-
-                if (countdown <= 0) {
-                    clearInterval(timerInterval);
-                    playNextRandom();
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                playerVars: {
+                    autoplay: 1,
+                    controls: 1,
+                    modestbranding: 1,
+                    rel: 0
+                },
+                events: {
+                    onReady: onPlayerReady,
+                    onStateChange: onPlayerStateChange
                 }
-            }, 1000);
+            });
         }
 
-        function updateTimer() {
-            document.getElementById('countdown').textContent = countdown + '초';
+        function onPlayerReady(event) {
+            document.getElementById('songCount').textContent = `총 ${songs.length}곡`;
+            renderPlaylist();
+            playRandomSong();
         }
 
-        function createFloatingHearts() {
-            const container = document.getElementById('floatingHearts');
-            const hearts = ['💙', '💚', '🩵', '💎', '✨', '🌿', '🍃'];
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+                setTimeout(() => {
+                    playRandomSong();
+                }, playDuration * 1000);
+            }
+        }
+
+        function playRandomSong() {
+            currentSongIndex = Math.floor(Math.random() * songs.length);
+            const song = songs[currentSongIndex];
+            playDuration = Math.floor(Math.random() * 11) + 45;
             
-            setInterval(() => {
-                const heart = document.createElement('div');
-                heart.className = 'heart';
-                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
-                heart.style.left = Math.random() * 100 + '%';
-                heart.style.animationDelay = Math.random() * 2 + 's';
-                heart.style.animationDuration = (Math.random() * 3 + 5) + 's';
-                container.appendChild(heart);
-
-                setTimeout(() => heart.remove(), 8000);
-            }, 1000);
+            document.getElementById('currentSong').textContent = song.title;
+            updatePlayingIndicator();
+            
+            if (player && player.loadVideoById) {
+                player.loadVideoById({
+                    videoId: song.id,
+                    startSeconds: 0,
+                    endSeconds: playDuration
+                });
+            }
         }
 
-        // ========================================
-        // 🚀 페이지 로드 시 즉시 실행
-        // ========================================
-        window.addEventListener('load', function() {
-            initializeFirebase();
-            createSongGrid();
-            createFloatingHearts();
-            
-            // 즉시 자동 재생 시작
-            const randomStart = Math.floor(Math.random() * videos.length);
-            playVideo(randomStart);
-        });
+        function reloadPage() {
+            location.reload();
+        }
 
-        // ========================================
-        // 🔄 새로고침 시에도 안정적 동작
-        // ========================================
-        window.addEventListener('beforeunload', function() {
-            if (timerInterval) clearInterval(timerInterval);
-        });
+        // 개발자 도구 열림 감지 (조용히 처리)
+        setInterval(() => {
+            const threshold = 160;
+            if (window.outerWidth - window.innerWidth > threshold || 
+                window.outerHeight - window.innerHeight > threshold) {
+                // 개발자 도구가 열리면 페이지를 새로고침하여 정상 상태로 복원
+                location.reload();
+            }
+        }, 2000);
     </script>
 </body>
 </html>
-
-
