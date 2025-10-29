@@ -210,6 +210,21 @@
             overflow: hidden;
             background: #000;
         }
+
+        /* 쇼츠 전용 비디오 래퍼 - PC 최적화 */
+        .video-wrapper.shorts-mode {
+            padding-bottom: 0;
+            height: auto;
+            max-width: 600px; /* PC에서 더 크게 */
+            margin: 0 auto;
+        }
+        
+        .video-wrapper.shorts-mode::before {
+            content: '';
+            display: block;
+            padding-bottom: 177.78%; /* 9:16 비율 */
+            max-height: 80vh; /* 화면 높이의 80%로 제한 */
+        }
         
         .video-wrapper iframe {
             position: absolute;
@@ -238,6 +253,24 @@
             gap: 8px;
             text-transform: uppercase;
             letter-spacing: 1px;
+        }
+
+        .shorts-indicator {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-left: 8px;
+            animation: pulse-shorts 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-shorts {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         .video-title {
@@ -315,149 +348,130 @@
         }
         
         .grid-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 900px;
             margin: 0 auto;
         }
         
         .song-card {
             background: white;
-            border-radius: 20px;
-            overflow: hidden;
+            border-radius: 16px;
+            padding: 18px 24px;
             box-shadow: 
-                0 4px 20px rgba(0, 206, 201, 0.08),
-                0 2px 8px rgba(0, 0, 0, 0.04);
+                0 2px 12px rgba(0, 206, 201, 0.08),
+                0 1px 4px rgba(0, 0, 0, 0.04);
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 2px solid transparent;
-        }
-        
-        .song-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 
-                0 12px 35px rgba(0, 206, 201, 0.2),
-                0 6px 15px rgba(0, 0, 0, 0.08);
-            border-color: rgba(0, 206, 201, 0.3);
-        }
-        
-        .song-card.playing {
-            border-color: #00CEC9;
-            box-shadow: 
-                0 12px 40px rgba(0, 206, 201, 0.3),
-                0 6px 20px rgba(0, 0, 0, 0.1),
-                inset 0 0 0 2px rgba(0, 206, 201, 0.1);
-            animation: glow-card 2s ease-in-out infinite;
-        }
-        
-        @keyframes glow-card {
-            0%, 100% { 
-                border-color: #00CEC9; 
-                box-shadow: 
-                    0 12px 40px rgba(0, 206, 201, 0.3),
-                    0 6px 20px rgba(0, 0, 0, 0.1);
-            }
-            50% { 
-                border-color: #00E0D4; 
-                box-shadow: 
-                    0 15px 50px rgba(0, 206, 201, 0.4),
-                    0 8px 25px rgba(0, 0, 0, 0.12);
-            }
-        }
-        
-        .thumbnail-wrapper {
-            position: relative;
-            padding-bottom: 56.25%;
-            overflow: hidden;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        }
-        
-        .thumbnail-wrapper img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .song-card:hover .thumbnail-wrapper img {
-            transform: scale(1.15);
-        }
-        
-        .play-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0, 206, 201, 0.85) 0%, rgba(0, 224, 212, 0.85) 100%);
             display: flex;
             align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            gap: 16px;
+            position: relative;
         }
-        
-        .song-card:hover .play-overlay {
-            opacity: 1;
+
+        .song-number {
+            font-size: 16px;
+            font-weight: 800;
+            color: #b2bec3;
+            min-width: 35px;
+            text-align: center;
         }
-        
-        .play-icon-large {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.95);
+
+        .song-card.playing .song-number {
+            color: #00CEC9;
+        }
+
+        .song-card.shorts-card.playing .song-number {
+            color: #FF6B6B;
+        }
+
+        .play-icon-small {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #00CEC9;
-            font-size: 24px;
-            box-shadow: 
-                0 8px 25px rgba(0, 0, 0, 0.2),
-                0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-            padding-left: 4px;
-        }
-        
-        .song-card:hover .play-icon-large {
-            transform: scale(1.1);
-        }
-        
-        .song-card.playing .play-overlay {
-            opacity: 1;
-            background: linear-gradient(135deg, rgba(0, 206, 201, 0.3) 0%, rgba(168, 230, 206, 0.3) 100%);
-        }
-        
-        .song-card.playing .play-icon-large {
-            animation: pulse-play 1.5s ease-in-out infinite;
-            background: #00CEC9;
             color: white;
+            font-size: 16px;
+            padding-left: 3px;
+            box-shadow: 0 4px 12px rgba(0, 206, 201, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .song-card.shorts-card .play-icon-small {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.25);
+        }
+
+        .song-title-grid {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2d3436;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .shorts-badge {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        }
+        
+        .song-card:hover {
+            transform: translateX(8px);
+            box-shadow: 
+                0 6px 20px rgba(0, 206, 201, 0.15),
+                0 3px 8px rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 206, 201, 0.2);
+        }
+
+        .song-card:hover .play-icon-small {
+            transform: scale(1.15);
+            box-shadow: 0 6px 16px rgba(0, 206, 201, 0.35);
+        }
+
+        .song-card.shorts-card:hover {
+            border-color: rgba(255, 107, 107, 0.2);
+        }
+
+        .song-card.shorts-card:hover .play-icon-small {
+            box-shadow: 0 6px 16px rgba(255, 107, 107, 0.35);
+        }
+        
+        .song-card.playing {
+            border-color: #00CEC9;
+            background: linear-gradient(135deg, rgba(0, 206, 201, 0.05) 0%, rgba(168, 230, 206, 0.05) 100%);
+            box-shadow: 
+                0 8px 24px rgba(0, 206, 201, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .song-card.shorts-card.playing {
+            border-color: #FF6B6B;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, rgba(255, 135, 135, 0.05) 100%);
+            box-shadow: 
+                0 8px 24px rgba(255, 107, 107, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .song-card.playing .play-icon-small {
+            animation: pulse-play 1.5s ease-in-out infinite;
         }
         
         @keyframes pulse-play {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.15); }
-        }
-        
-        .song-info {
-            padding: 14px;
-            background: white;
-        }
-        
-        .song-title-grid {
-            font-size: 13px;
-            font-weight: 700;
-            color: #2d3436;
-            line-height: 1.5;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            min-height: 39px;
         }
         
         .firebase-status {
@@ -555,6 +569,15 @@
                 letter-spacing: 0.3px;
             }
 
+            .video-wrapper.shorts-mode {
+                max-width: 100%;
+            }
+            
+            .video-wrapper.shorts-mode::before {
+                padding-bottom: 177.78%;
+                max-height: none;
+            }
+
             .video-info {
                 padding: 20px 15px;
             }
@@ -562,6 +585,15 @@
             .video-title {
                 font-size: 18px;
                 margin-bottom: 15px;
+            }
+
+            .now-playing {
+                font-size: 11px;
+            }
+
+            .shorts-indicator {
+                font-size: 10px;
+                padding: 3px 10px;
             }
 
             .timer-box {
@@ -590,12 +622,33 @@
             }
 
             .grid-container {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 14px;
+                gap: 10px;
+            }
+
+            .song-card {
+                padding: 14px 18px;
+                gap: 12px;
+            }
+
+            .song-number {
+                font-size: 14px;
+                min-width: 30px;
+            }
+
+            .play-icon-small {
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                font-size: 14px;
             }
 
             .song-title-grid {
-                font-size: 12px;
+                font-size: 14px;
+            }
+
+            .shorts-badge {
+                font-size: 10px;
+                padding: 5px 12px;
             }
 
             /* 모바일에서 hover 효과 제거 및 터치 최적화 */
@@ -604,7 +657,7 @@
             }
 
             .song-card:active {
-                transform: scale(0.97);
+                transform: scale(0.98);
                 transition: transform 0.1s ease;
             }
 
@@ -632,11 +685,6 @@
         /* 📱 태블릿 최적화 (768px-1023px)               */
         /* ============================================ */
         @media screen and (min-width: 768px) and (max-width: 1023px) {
-            .grid-container {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
-            }
-
             .header {
                 padding: 35px 25px;
             }
@@ -654,6 +702,10 @@
                 font-size: 18px;
             }
 
+            .video-wrapper.shorts-mode {
+                max-width: 450px;
+            }
+
             .stats-section {
                 padding: 35px 25px;
             }
@@ -661,15 +713,18 @@
             .section-title {
                 font-size: 24px;
             }
+
+            .song-card {
+                padding: 16px 22px;
+            }
         }
 
         /* ============================================ */
-        /* 🖥️ 데스크탑 최적화 (1024px+)                  */
+        /* 🖥️ 대형 PC 화면 (1440px 이상)                */
         /* ============================================ */
-        @media (max-width: 1024px) {
-            .grid-container {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 16px;
+        @media screen and (min-width: 1440px) {
+            .video-wrapper.shorts-mode {
+                max-width: 650px;
             }
         }
 
@@ -684,7 +739,7 @@
 
             /* 터치 시 즉각적인 피드백 */
             .song-card:active {
-                transform: scale(0.97);
+                transform: scale(0.98);
                 transition: transform 0.1s ease;
             }
 
@@ -692,8 +747,8 @@
             .song-card:hover {
                 transform: none;
                 box-shadow: 
-                    0 4px 20px rgba(0, 206, 201, 0.08),
-                    0 2px 8px rgba(0, 0, 0, 0.04);
+                    0 2px 12px rgba(0, 206, 201, 0.08),
+                    0 1px 4px rgba(0, 0, 0, 0.04);
             }
 
             .next-btn:hover {
@@ -736,7 +791,11 @@
             }
 
             .grid-container {
-                gap: 12px;
+                gap: 8px;
+            }
+
+            .song-card {
+                padding: 12px 16px;
             }
         }
     </style>
@@ -759,23 +818,24 @@
         </div>
 
         <div class="video-container">
-            <div class="video-wrapper">
+            <div class="video-wrapper" id="videoWrapper">
                 <iframe id="videoFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
             <div class="video-info">
                 <div class="now-playing">
                     <span>▶ NOW PLAYING</span>
+                    <span class="shorts-indicator" id="shortsIndicator" style="display: none;">SHORTS</span>
                 </div>
                 <div class="video-title" id="videoTitle">로딩 중...</div>
-                <div class="timer-box">
-                    다음 곡까지: <span class="timer-number" id="countdown">-</span>
+                <div class="timer-box" id="timerBox">
+                    <span id="timerText">다음 곡까지: <span class="timer-number" id="countdown">-</span></span>
                 </div>
                 <button class="next-btn" onclick="playNextRandom()">🎲 랜덤플레이 타임</button>
             </div>
         </div>
 
         <div class="stats-section">
-            <div class="section-title">🎼 수록곡 목록 (총 16곡)</div>
+            <div class="section-title">🎼 수록곡 목록 (총 19곡)</div>
             <div class="grid-container" id="songGrid"></div>
         </div>
     </div>
@@ -799,22 +859,29 @@
         };
 
         const videos = [
-            { id: 'nczfiJBMA2U', title: '내게 남은 사랑을 드릴께요 Official MV'},
-            { id: 'n47GSwm7MuI', title: '장민호 유튜브 시작 EP.00'},
-            { id: 'Ghg7vG3NMs4', title: 'Hankyeryeong Pass' },
-            { id: 'ILppFoa3FTI', title: 'Lonely Love' },
-            { id: 'DKgiBUaZXr4', title: 'My Reflection in My Heart' },
-            { id: 'a7hUuTsNIRY', title: 'Stay by My Side(내 곁에 있어주)' },
-            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE' },
-            { id: '1LlNcwtxsgg', title: 'I\'ll Give You the Love I Have Left'},
-            { id: 'rsW-F7IRGmU', title: 'Just a Friend' },
-            { id: 'H8ZnFKkc7ps', title: 'That Day'},
-            { id: 'q78AVE07wdI', title: 'I will let go' },
-            { id: '0JeQF_nrSmU', title: '내 곁에 있어주 (Stay by My Side) Official MV' },
-            { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', initialViews:65623 },
-            { id: '-zYhlQn6yVI', title: '내 이름 아시죠 | 사랑의콜센타', initialViews: 8833996},
-            { id: 'ZOPl8hBKd5c', title: ' 하이뮨의 NEW CF 촬영 현장', initialViews: 10202 },
-            { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', initialViews: 0}
+              // 🎬 쇼츠 영상들
+            { id: 'uV8KpDCkhds', title: '뭘 하면 좋을 지 댓글로 추천해 주세요', isShort: true },
+            { id: 'mWRsIldtV1k', title: '채널 비하인드', isShort: true },
+            { id: '0q9tgaWDLAk', title: '장민호가 평양냉면을 먹는 이유', isShort: true },
+            { id: 'yluKcIVKAss', title: '[모집티저] 국보급 얼굴 MC 장민호, 가을타며 기다리는 단 한사람은?!', isShort: true },
+
+            
+            { id: 'nczfiJBMA2U', title: '내게 남은 사랑을 드릴께요 Official MV', isShort: false },
+            { id: 'n47GSwm7MuI', title: '장민호 유튜브 시작 EP.00', isShort: false },
+            { id: 'Ghg7vG3NMs4', title: 'Hankyeryeong Pass', isShort: false },
+            { id: 'ILppFoa3FTI', title: 'Lonely Love', isShort: false },
+            { id: 'DKgiBUaZXr4', title: 'My Reflection in My Heart', isShort: false },
+            { id: 'a7hUuTsNIRY', title: 'Stay by My Side(내 곁에 있어주)', isShort: false },
+            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE', isShort: false },
+            { id: '1LlNcwtxsgg', title: 'I\'ll Give You the Love I Have Left', isShort: false },
+            { id: 'rsW-F7IRGmU', title: 'Just a Friend', isShort: false },
+            { id: 'H8ZnFKkc7ps', title: 'That Day', isShort: false },
+            { id: 'q78AVE07wdI', title: 'I will let go', isShort: false },
+            { id: '0JeQF_nrSmU', title: '내 곁에 있어주 (Stay by My Side) Official MV', isShort: false },
+            { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', initialViews: 65623, isShort: false },
+            { id: '-zYhlQn6yVI', title: '내 이름 아시죠 | 사랑의콜센타', initialViews: 8833996, isShort: false },
+            { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', initialViews: 0, isShort: false }
+          
         ];
 
         let db;
@@ -822,25 +889,23 @@
         let isPlaying = false;
         let countdown = 0;
         let timerInterval;
+        let isCurrentShort = false;
 
         // ========================================
-        // ⏰ 시간대별 자동 재생 설정
+        // ⏰ 시간대별 자동 재생 설정 (일반 영상용)
         // ========================================
         function getTimeBasedDuration() {
             const hour = new Date().getHours();
             let min, max;
 
             if (hour >= 6 && hour < 12) {
-                // 아침 (06:00-11:59): 85~95초
-                min = 85;
+                min = 65;
                 max = 95;
             } else if (hour >= 12 && hour < 18) {
-                // 점심 (12:00-17:59): 85~95초
-                min = 85;
+                min = 65;
                 max = 95;
             } else {
-                // 저녁 (18:00-05:59):85~100초
-                min = 85;
+                min = 65;
                 max = 100;
             }
 
@@ -875,19 +940,20 @@
         }
 
         function createSongGrid() {
-            const gridHTML = videos.map((video, index) => `
-                <div class="song-card ${index === currentIndex && isPlaying ? 'playing' : ''}" onclick="playVideo(${index})" id="card-${index}">
-                    <div class="thumbnail-wrapper">
-                        <img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg" alt="${video.title}" loading="lazy">
-                        <div class="play-overlay">
-                            <div class="play-icon-large">▶</div>
-                        </div>
-                    </div>
-                    <div class="song-info">
+            const gridHTML = videos.map((video, index) => {
+                const shortsClass = video.isShort ? 'shorts-card' : '';
+                const playingClass = index === currentIndex && isPlaying ? 'playing' : '';
+                const shortsBadge = video.isShort ? '<span class="shorts-badge">SHORTS</span>' : '';
+                
+                return `
+                    <div class="song-card ${shortsClass} ${playingClass}" onclick="playVideo(${index})" id="card-${index}">
+                        <span class="song-number">${String(index + 1).padStart(2, '0')}</span>
+                        <div class="play-icon-small">▶</div>
                         <div class="song-title-grid">${video.title}</div>
+                        ${shortsBadge}
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             document.getElementById('songGrid').innerHTML = gridHTML;
         }
@@ -907,12 +973,42 @@
             isPlaying = true;
             
             const video = videos[index];
+            isCurrentShort = video.isShort;
+
+            // 비디오 래퍼 스타일 변경 (쇼츠면 세로, 일반이면 가로)
+            const videoWrapper = document.getElementById('videoWrapper');
+            const shortsIndicator = document.getElementById('shortsIndicator');
+            const timerBox = document.getElementById('timerBox');
+            const timerText = document.getElementById('timerText');
+
+            if (isCurrentShort) {
+                videoWrapper.classList.add('shorts-mode');
+                shortsIndicator.style.display = 'inline-block';
+                timerBox.style.display = 'none'; // 쇼츠 재생 시 타이머 박스 숨김
+            } else {
+                videoWrapper.classList.remove('shorts-mode');
+                shortsIndicator.style.display = 'none';
+                timerBox.style.display = 'block'; // 일반 영상은 타이머 박스 표시
+                timerText.innerHTML = '다음 곡까지: <span class="timer-number" id="countdown">-</span>';
+            }
+            
             document.getElementById('videoFrame').src = 
                 `https://www.youtube.com/embed/${video.id}?autoplay=1&controls=1&rel=0`;
             document.getElementById('videoTitle').textContent = video.title;
 
-            const duration = getTimeBasedDuration();
-            startTimer(duration);
+            // 쇼츠는 짧은 시간 후 자동 넘김
+            if (isCurrentShort) {
+                // 쇼츠는 보통 15-60초이므로 35초 후 자동 넘김
+                if (timerInterval) clearInterval(timerInterval);
+                setTimeout(() => {
+                    playNextRandom();
+                }, 35000); // 35초
+            } else {
+                // 일반 영상은 랜덤 시간 타이머
+                const duration = getTimeBasedDuration();
+                startTimer(duration);
+            }
+
             updatePlayingCard();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -943,7 +1039,10 @@
         }
 
         function updateTimer() {
-            document.getElementById('countdown').textContent = countdown + '초';
+            const countdownEl = document.getElementById('countdown');
+            if (countdownEl) {
+                countdownEl.textContent = countdown + '초';
+            }
         }
 
         function createFloatingHearts() {
@@ -985,4 +1084,7 @@
     </script>
 </body>
 </html>
+
+
+
 
