@@ -215,18 +215,19 @@
         .video-wrapper.shorts-mode {
             padding-bottom: 0;
             height: auto;
-            max-width: 600px; /* PC에서 더 크게 */
+            max-width: 600px;
             margin: 0 auto;
         }
         
         .video-wrapper.shorts-mode::before {
             content: '';
             display: block;
-            padding-bottom: 177.78%; /* 9:16 비율 */
-            max-height: 80vh; /* 화면 높이의 80%로 제한 */
+            padding-bottom: 177.78%;
+            max-height: 80vh;
         }
         
-        .video-wrapper iframe {
+        .video-wrapper iframe,
+        .video-wrapper #player {
             position: absolute;
             top: 0;
             left: 0;
@@ -279,6 +280,66 @@
             margin-bottom: 20px;
             color: #2d3436;
             line-height: 1.3;
+        }
+
+        /* 볼륨 조절 바 스타일 */
+        .volume-control {
+            margin-bottom: 20px;
+        }
+
+        .volume-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, rgba(0, 206, 201, 0.05) 0%, rgba(168, 230, 206, 0.05) 100%);
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: 2px solid rgba(0, 206, 201, 0.15);
+        }
+
+        .volume-icon {
+            font-size: 20px;
+            min-width: 24px;
+        }
+
+        #volumeSlider {
+            flex: 1;
+            height: 6px;
+            border-radius: 10px;
+            background: #dfe6e9;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 206, 201, 0.3);
+        }
+
+        #volumeSlider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 206, 201, 0.3);
+        }
+
+        #volumeDisplay {
+            font-size: 14px;
+            font-weight: 700;
+            color: #00CEC9;
+            min-width: 45px;
+            text-align: right;
         }
         
         .timer-box {
@@ -596,6 +657,19 @@
                 padding: 3px 10px;
             }
 
+            .volume-wrapper {
+                padding: 10px 16px;
+            }
+
+            .volume-icon {
+                font-size: 18px;
+            }
+
+            #volumeDisplay {
+                font-size: 13px;
+                min-width: 40px;
+            }
+
             .timer-box {
                 padding: 12px 20px;
                 font-size: 14px;
@@ -651,7 +725,6 @@
                 padding: 5px 12px;
             }
 
-            /* 모바일에서 hover 효과 제거 및 터치 최적화 */
             .song-card:hover {
                 transform: none;
             }
@@ -681,9 +754,6 @@
             }
         }
 
-        /* ============================================ */
-        /* 📱 태블릿 최적화 (768px-1023px)               */
-        /* ============================================ */
         @media screen and (min-width: 768px) and (max-width: 1023px) {
             .header {
                 padding: 35px 25px;
@@ -719,31 +789,23 @@
             }
         }
 
-        /* ============================================ */
-        /* 🖥️ 대형 PC 화면 (1440px 이상)                */
-        /* ============================================ */
         @media screen and (min-width: 1440px) {
             .video-wrapper.shorts-mode {
                 max-width: 650px;
             }
         }
 
-        /* ============================================ */
-        /* 🎯 터치 디바이스 최적화                        */
-        /* ============================================ */
         @media (hover: none) and (pointer: coarse) {
             .song-card {
                 -webkit-tap-highlight-color: transparent;
                 touch-action: manipulation;
             }
 
-            /* 터치 시 즉각적인 피드백 */
             .song-card:active {
                 transform: scale(0.98);
                 transition: transform 0.1s ease;
             }
 
-            /* 터치 디바이스에서 hover 효과 비활성화 */
             .song-card:hover {
                 transform: none;
                 box-shadow: 
@@ -760,9 +822,6 @@
             }
         }
 
-        /* ============================================ */
-        /* 🌐 가로 모드 모바일 최적화                     */
-        /* ============================================ */
         @media screen and (max-height: 500px) and (orientation: landscape) {
             .header {
                 padding: 20px;
@@ -819,7 +878,7 @@
 
         <div class="video-container">
             <div class="video-wrapper" id="videoWrapper">
-                <iframe id="videoFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <div id="player"></div>
             </div>
             <div class="video-info">
                 <div class="now-playing">
@@ -827,19 +886,29 @@
                     <span class="shorts-indicator" id="shortsIndicator" style="display: none;">SHORTS</span>
                 </div>
                 <div class="video-title" id="videoTitle">로딩 중...</div>
-                <div class="timer-box" id="timerBox">
-                    <span id="timerText">다음 곡까지: <span class="timer-number" id="countdown">-</span></span>
+                
+                <!-- 볼륨 조절 바 -->
+                <div class="volume-control">
+                    <div class="volume-wrapper">
+                        <span class="volume-icon">🔊</span>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                        <span id="volumeDisplay">50%</span>
+                    </div>
                 </div>
-                <button class="next-btn" onclick="playNextRandom()">🎲 랜덤플레이 타임</button>
+
+                <div class="timer-box" id="timerBox">
+                    <span id="timerText">다음 곡까지: <span class="timer-number" id="countdown">로딩 중...</span></span>
+                </div>
             </div>
         </div>
 
         <div class="stats-section">
-            <div class="section-title">🎼 수록곡 목록 (총 21곡)</div>
             <div class="grid-container" id="songGrid"></div>
         </div>
     </div>
 
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
@@ -859,15 +928,8 @@
         };
 
         const videos = [
-              // 🎬 쇼츠 영상들
-            { id: 'uV8KpDCkhds', title: '뭘 하면 좋을 지 댓글로 추천해 주세요', isShort: true },
-            { id: 'mWRsIldtV1k', title: '채널 비하인드', isShort: true },
-            { id: '0q9tgaWDLAk', title: '장민호가 평양냉면을 먹는 이유', isShort: true },
-            { id: 'yluKcIVKAss', title: '[모집티저] 국보급 얼굴 MC 장민호, 가을타며 기다리는 단 한사람은?!', isShort: true },
-            { id: '15X0nd1_-kI', title: '발소리👞 쾌감 찢었다 홀로된사랑', isShort: true },
-            
             { id: 'v_3hazNandw', title: '홀로된 사랑 (Lonely Love)안무 버전', isShort: false },
-             { id: 'WErpzFpA7XM', title: '장하다장민호 EP.01', isShort: false },
+             { id: 'WErpzFpA7XM', title: '장하다장민호EP.01', isShort: false },
             { id: 'nczfiJBMA2U', title: '내게 남은 사랑을 드릴께요 Official MV', isShort: false },
             { id: 'n47GSwm7MuI', title: '장민호 유튜브 시작 EP.00', isShort: false },
             { id: 'Ghg7vG3NMs4', title: 'Hankyeryeong Pass', isShort: false },
@@ -883,10 +945,10 @@
             { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', initialViews: 65623, isShort: false },
             { id: '-zYhlQn6yVI', title: '내 이름 아시죠 | 사랑의콜센타', initialViews: 8833996, isShort: false },
             { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', initialViews: 0, isShort: false }
-          
         ];
 
         let db;
+        let player;
         let currentIndex = 0;
         let isPlaying = false;
         let countdown = 0;
@@ -894,7 +956,14 @@
         let isCurrentShort = false;
 
         // ========================================
-        // ⏰ 시간대별 자동 재생 설정 (일반 영상용)
+        // 🎬 YouTube IFrame API 초기화
+        // ========================================
+        function onYouTubeIframeAPIReady() {
+            console.log('YouTube IFrame API 로드됨');
+        }
+
+        // ========================================
+        // ⏰ 시간대별 자동 재생 설정
         // ========================================
         function getTimeBasedDuration() {
             const hour = new Date().getHours();
@@ -977,7 +1046,6 @@
             const video = videos[index];
             isCurrentShort = video.isShort;
 
-            // 비디오 래퍼 스타일 변경 (쇼츠면 세로, 일반이면 가로)
             const videoWrapper = document.getElementById('videoWrapper');
             const shortsIndicator = document.getElementById('shortsIndicator');
             const timerBox = document.getElementById('timerBox');
@@ -986,33 +1054,59 @@
             if (isCurrentShort) {
                 videoWrapper.classList.add('shorts-mode');
                 shortsIndicator.style.display = 'inline-block';
-                timerBox.style.display = 'none'; // 쇼츠 재생 시 타이머 박스 숨김
+                timerBox.style.display = 'none';
             } else {
                 videoWrapper.classList.remove('shorts-mode');
                 shortsIndicator.style.display = 'none';
-                timerBox.style.display = 'block'; // 일반 영상은 타이머 박스 표시
-                timerText.innerHTML = '다음 곡까지: <span class="timer-number" id="countdown">-</span>';
+                timerBox.style.display = 'block';
+                const duration = getTimeBasedDuration();
+                timerText.innerHTML = '다음 곡까지: <span class="timer-number" id="countdown">' + duration + '초</span>';
             }
             
-            document.getElementById('videoFrame').src = 
-                `https://www.youtube.com/embed/${video.id}?autoplay=1&controls=1&rel=0`;
             document.getElementById('videoTitle').textContent = video.title;
 
-            // 쇼츠는 짧은 시간 후 자동 넘김
+            // 일반 영상일 경우 타이머 시작
+            let videoDuration;
+            if (!isCurrentShort) {
+                videoDuration = getTimeBasedDuration();
+                startTimer(videoDuration);
+            }
+
+            // YouTube Player 생성 또는 교체
+            if (player) {
+                player.loadVideoById(video.id);
+            } else {
+                player = new YT.Player('player', {
+                    videoId: video.id,
+                    playerVars: {
+                        autoplay: 1,
+                        controls: 1,
+                        rel: 0
+                    },
+                    events: {
+                        'onReady': onPlayerReady
+                    }
+                });
+            }
+
             if (isCurrentShort) {
-                // 쇼츠는 보통 15-60초이므로 35초 후 자동 넘김
                 if (timerInterval) clearInterval(timerInterval);
                 setTimeout(() => {
                     playNextRandom();
-                }, 35000); // 35초
-            } else {
-                // 일반 영상은 랜덤 시간 타이머
-                const duration = getTimeBasedDuration();
-                startTimer(duration);
+                }, 35000);
             }
 
             updatePlayingCard();
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function onPlayerReady(event) {
+            // 저장된 볼륨 불러오기
+            const savedVolume = localStorage.getItem('playerVolume') || 50;
+            player.setVolume(savedVolume);
+            document.getElementById('volumeSlider').value = savedVolume;
+            document.getElementById('volumeDisplay').textContent = savedVolume + '%';
+            updateVolumeSliderBackground(savedVolume);
         }
 
         function playNextRandom() {
@@ -1065,6 +1159,15 @@
         }
 
         // ========================================
+        // 🔊 볼륨 조절 기능
+        // ========================================
+        function updateVolumeSliderBackground(value) {
+            const slider = document.getElementById('volumeSlider');
+            const percentage = value;
+            slider.style.background = `linear-gradient(to right, #00CEC9 0%, #00CEC9 ${percentage}%, #dfe6e9 ${percentage}%, #dfe6e9 100%)`;
+        }
+
+        // ========================================
         // 🚀 페이지 로드 시 즉시 실행
         // ========================================
         window.addEventListener('load', function() {
@@ -1072,24 +1175,33 @@
             createSongGrid();
             createFloatingHearts();
             
+            // 볼륨 슬라이더 이벤트
+            const volumeSlider = document.getElementById('volumeSlider');
+            volumeSlider.addEventListener('input', function() {
+                const volume = this.value;
+                if (player && player.setVolume) {
+                    player.setVolume(volume);
+                }
+                document.getElementById('volumeDisplay').textContent = volume + '%';
+                localStorage.setItem('playerVolume', volume);
+                updateVolumeSliderBackground(volume);
+            });
+
+            // 초기 슬라이더 배경 설정
+            const savedVolume = localStorage.getItem('playerVolume') || 50;
+            updateVolumeSliderBackground(savedVolume);
+            
             // 즉시 자동 재생 시작
             const randomStart = Math.floor(Math.random() * videos.length);
             playVideo(randomStart);
         });
 
-        // ========================================
-        // 🔄 새로고침 시에도 안정적 동작
-        // ========================================
         window.addEventListener('beforeunload', function() {
             if (timerInterval) clearInterval(timerInterval);
         });
     </script>
 </body>
 </html>
-
-
-
-
 
 
 
