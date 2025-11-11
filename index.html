@@ -206,32 +206,23 @@
             startPlaybackMonitoring();
         }
 
-        // 재생 모니터링 (멈춤 감지 및 자동 재시작)
+        // 재생 모니터링 (상태 표시만, src 변경 없음)
         function startPlaybackMonitoring() {
             // 기존 인터벌 제거
             if (playCheckInterval) {
                 clearInterval(playCheckInterval);
             }
             
-            // 3초마다 재생 상태 체크 및 자동 재시작
+            // 10초마다 상태 표시만 업데이트 (src 변경 안함)
             playCheckInterval = setInterval(() => {
-                // iframe 다시 로드로 재생 강제 (멈춤 방지)
-                const iframe = document.getElementById('player');
-                const currentSrc = iframe.src;
-                
-                // 모바일 환경에서 더 적극적으로 재생 유지
-                if (isMobileDevice()) {
-                    // src를 재설정하여 강제 재로드 (5초마다)
-                    if (autoplayAttempts % 2 === 0) {
-                        iframe.src = currentSrc + '&t=' + Date.now();
-                    }
-                }
-                
                 autoplayAttempts++;
-                playStatusElement.textContent = `✅ 연속재생 모니터링 중... (${autoplayAttempts}회 체크)`;
+                playStatusElement.textContent = `✅ 연속재생 중... (${autoplayAttempts}회 체크)`;
                 playStatusElement.style.color = '#10b981';
                 
-            }, 3000); // 3초마다 체크
+                // 콘솔로 상태만 로깅
+                console.log(`재생 체크 ${autoplayAttempts}회 - src 변경 없이 모니터링 중`);
+                
+            }, 10000); // 10초마다 상태만 체크
         }
 
         // 모바일 기기 감지
@@ -355,29 +346,16 @@
             }
         });
 
-        // 페이지 가시성 변경 감지 (백그라운드에서 돌아올 때 재생 재개)
+        // 페이지 가시성 변경 감지 (백그라운드에서 돌아올 때)
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                // 페이지가 다시 보일 때 재생 강제
-                setTimeout(() => {
-                    updatePlayer(currentPlaylistId, true);
-                    playStatusElement.textContent = '🔄 페이지 복귀 - 재생 재개!';
-                    playStatusElement.style.color = '#10b981';
-                }, 300);
-            }
-        });
-
-        // 윈도우 포커스 감지 (탭 전환 시 재생 유지)
-        window.addEventListener('focus', function() {
-            setTimeout(() => {
-                const iframe = document.getElementById('player');
-                iframe.src = iframe.src + '&resume=' + Date.now();
-                playStatusElement.textContent = '🎵 포커스 복귀 - 재생 유지!';
+                // 페이지가 다시 보일 때 상태 표시만 업데이트 (src 변경 안함)
+                playStatusElement.textContent = '🔄 페이지 복귀 - 재생 계속!';
                 playStatusElement.style.color = '#10b981';
-            }, 200);
+                console.log('페이지 복귀 - 재생은 계속됩니다');
+            }
         });
     </script>
 </body>
 </html>
-
 
