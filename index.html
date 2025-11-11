@@ -206,23 +206,36 @@
             startPlaybackMonitoring();
         }
 
-        // 재생 모니터링 (상태 표시만, src 변경 없음)
+        // 재생 모니터링 (모바일 재생 중단 감지 및 자동 재시작)
         function startPlaybackMonitoring() {
             // 기존 인터벌 제거
             if (playCheckInterval) {
                 clearInterval(playCheckInterval);
             }
             
-            // 10초마다 상태 표시만 업데이트 (src 변경 안함)
+            let lastCheckTime = Date.now();
+            
+            // 5초마다 재생 상태 체크 (모바일 최적화)
             playCheckInterval = setInterval(() => {
                 autoplayAttempts++;
-                playStatusElement.textContent = `✅ 연속재생 중... (${autoplayAttempts}회 체크)`;
-                playStatusElement.style.color = '#10b981';
+                const currentTime = Date.now();
+                const timeDiff = currentTime - lastCheckTime;
+                lastCheckTime = currentTime;
                 
-                // 콘솔로 상태만 로깅
-                console.log(`재생 체크 ${autoplayAttempts}회 - src 변경 없이 모니터링 중`);
+                // 시간 차이가 너무 크면 백그라운드에서 돌아온 것으로 판단
+                if (timeDiff > 7000) {
+                    console.log('백그라운드에서 복귀 감지 - 재생 재시작');
+                    playStatusElement.textContent = '🔄 재생 재시작 중...';
+                    playStatusElement.style.color = '#f59e0b';
+                    updatePlayer(currentPlaylistId, true);
+                } else {
+                    playStatusElement.textContent = `✅ 연속재생 중... (${autoplayAttempts}회 체크)`;
+                    playStatusElement.style.color = '#10b981';
+                }
                 
-            }, 10000); // 10초마다 상태만 체크
+                console.log(`재생 체크 ${autoplayAttempts}회 - 모니터링 중`);
+                
+            }, 5000); // 5초마다 체크
         }
 
         // 모바일 기기 감지
@@ -346,16 +359,42 @@
             }
         });
 
-        // 페이지 가시성 변경 감지 (백그라운드에서 돌아올 때)
+        // 페이지 가시성 변경 감지 (백그라운드에서 돌아올 때 자동 재생)
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                // 페이지가 다시 보일 때 상태 표시만 업데이트 (src 변경 안함)
-                playStatusElement.textContent = '🔄 페이지 복귀 - 재생 계속!';
-                playStatusElement.style.color = '#10b981';
-                console.log('페이지 복귀 - 재생은 계속됩니다');
+                // 페이지가 다시 보일 때 즉시 재생 재시작
+                playStatusElement.textContent = '🔄 페이지 복귀 - 재생 재시작!';
+                playStatusElement.style.color = '#f59e0b';
+                console.log('페이지 복귀 - 자동 재생 재시작');
+                
+                // 500ms 후 재생 재시작
+                setTimeout(() => {
+                    updatePlayer(currentPlaylistId, true);
+                }, 500);
             }
+        });
+
+        // 모바일 포커스 복귀 감지 (추가 안전장치)
+        window.addEventListener('focus', function() {
+            console.log('윈도우 포커스 복귀 - 재생 상태 확인');
+            playStatusElement.textContent = '👁️ 화면 활성화 - 재생 확인 중...';
+            playStatusElement.style.color = '#6366f1';
+            
+            setTimeout(() => {
+                updatePlayer(currentPlaylistId, true);
+            }, 300);
+        });
+
+        // 모바일 네트워크 재연결 감지
+        window.addEventListener('online', function() {
+            console.log('네트워크 재연결 - 재생 재시작');
+            playStatusElement.textContent = '📶 네트워크 복구 - 재생 재시작!';
+            playStatusElement.style.color = '#10b981';
+            
+            setTimeout(() => {
+                updatePlayer(currentPlaylistId, true);
+            }, 500);
         });
     </script>
 </body>
 </html>
-
